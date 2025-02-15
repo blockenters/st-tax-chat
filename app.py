@@ -93,19 +93,19 @@ if prompt := st.chat_input("세무 관련 질문을 입력하세요."):
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # 쿼리 엔진 설정 및 응답 생성
-    query_engine = st.session_state.index.as_query_engine(
-        similarity_top_k=5,
-        response_mode="compact",
-        streaming=True,
-        temperature=0
-    )
-
     # 어시스턴트 응답 표시
     with st.chat_message("assistant"):
-        response = query_engine.query(prompt)
-        st.markdown(response)
-        st.session_state.messages.append({"role": "assistant", "content": str(response)})
+        with st.spinner('답변을 생성하고 있습니다...'):
+            # 쿼리 엔진 설정 및 응답 생성
+            query_engine = st.session_state.index.as_query_engine(
+                similarity_top_k=5,
+                response_mode="compact",
+                streaming=True,
+                temperature=0
+            )
+            response = query_engine.query(prompt)
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": str(response)})
 
 # 사이드바에 도움말 추가
 with st.sidebar:
