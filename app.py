@@ -108,7 +108,7 @@ for message in st.session_state.messages:
 
 # 사용자 입력 처리
 if prompt := st.chat_input("세무 관련 질문을 입력하세요."):
-    with st.spinner('데이터를 로딩중입니다...'):
+    with st.spinner('답변을 생성중입니다...'):
         # 사용자 메시지 표시
         st.chat_message("user").markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
