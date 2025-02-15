@@ -34,12 +34,14 @@ def download_index_data():
     repo_id = "blockenters/tax-index-dztax"
     local_dir = "tax-index-dztax"
     
-    snapshot_download(
-        repo_id=repo_id,
-        local_dir=local_dir,
-        repo_type='dataset',
-        token=st.secrets["api_keys"]["huggingface"]
-    )
+    # 로컬에 파일이 없을 때만 다운로드
+    if not os.path.exists(local_dir):
+        snapshot_download(
+            repo_id=repo_id,
+            local_dir=local_dir,
+            repo_type='dataset',
+            token=st.secrets["api_keys"]["huggingface"]
+        )
     return local_dir
 
 @st.cache_resource
