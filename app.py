@@ -25,7 +25,8 @@ def initialize_llm():
 def initialize_embedding_model():
     """임베딩 모델 초기화"""
     return HuggingFaceEmbedding(
-        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        token=st.secrets["api_keys"]["huggingface"]
     )
 
 @st.cache_data
@@ -72,7 +73,25 @@ if 'index' not in st.session_state:
 
     with st.spinner('데이터를 로딩중입니다...'):
         local_dir = download_index_data()
-        st.session_state.index = load_index(local_dir)
+        index = load_index(local_dir)
+        st.session_state.index = index
+    
+    # 쿼리 엔진 설정 및 응답 생성
+    query_engine = index.as_query_engine(
+        similarity_top_k=5,
+        response_mode="compact",
+        streaming=True,
+        temperature=0
+    )
+else:
+    index = st.session_state.index
+    query_engine = index.as_query_engine(
+        similarity_top_k=5,
+        response_mode="compact",
+        streaming=True,
+        temperature=0
+    )   
+
 
 # 채팅 기록 초기화
 if 'messages' not in st.session_state:
@@ -89,20 +108,13 @@ for message in st.session_state.messages:
 
 # 사용자 입력 처리
 if prompt := st.chat_input("세무 관련 질문을 입력하세요."):
-    # 사용자 메시지 표시
-    st.chat_message("user").markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.spinner('데이터를 로딩중입니다...'):
+        # 사용자 메시지 표시
+        st.chat_message("user").markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # 어시스턴트 응답 표시
-    with st.chat_message("assistant"):
-        with st.spinner('답변을 생성하고 있습니다...'):
-            # 쿼리 엔진 설정 및 응답 생성
-            query_engine = st.session_state.index.as_query_engine(
-                similarity_top_k=5,
-                response_mode="compact",
-                streaming=True,
-                temperature=0
-            )
+        # 어시스턴트 응답 표시
+        with st.chat_message("assistant"):
             response = query_engine.query(prompt)
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": str(response)})
