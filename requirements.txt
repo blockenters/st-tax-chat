@@ -1,0 +1,11 @@
+requests 
+beautifulsoup4
+
+together 
+llama-index-llms-together
+
+llama-index 
+llama-index-embeddings-huggingface 
+llama-index-llms-huggingface
+
+huggingface-hub
